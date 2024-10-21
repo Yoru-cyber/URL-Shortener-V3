@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using URL_Shortener.Context;
 using Url_Shortener.DTOs;
+using URL_Shortener.Entities;
 using URL_Shortener.Utils;
 
 namespace URL_Shortener.Controllers;
@@ -8,19 +11,42 @@ namespace URL_Shortener.Controllers;
 [ApiController]
 public class ShortenerController : ControllerBase
 {
+    private readonly ShortenedUrlContext _context;
+
+    public ShortenerController(ShortenedUrlContext shortenedUrlContext)
+    {
+        _context = shortenedUrlContext;
+    }
+
+    [HttpGet("")]
+    public async Task<IActionResult> index()
+    {
+        return Ok();
+    }
+
+
     // POST api/url/encode
     [HttpPost("encode")]
-    public async Task<IActionResult> EncodeUrl([FromForm] UrlPostRequest request)
+    public async Task<IActionResult> EncodeUrl([FromForm] UrlDTORequest request)
     {
-        if (string.IsNullOrEmpty(request.Url))
-        {
-            return BadRequest("URL cannot be empty");
-        }
-        
+        if (string.IsNullOrEmpty(request.Url)) return BadRequest("URL cannot be empty");
+
         // Generate a unique number based on the URL and encode it to Base62
         var uniqueNumber = Base62Encoder.GenerateUniqueNumber(request.Url);
         var encodedUrl = Base62Encoder.Encode(uniqueNumber);
+        var u = new ShortenedUrl {originalUrl = request.Url, shortenedUrl = encodedUrl};
+        var shortenedUrl = await _context.AddAsync(u);
+        if (shortenedUrl.State == EntityState.Added) return Ok(shortenedUrl.Entity);
+        return Conflict("Could not add URL");
+    }
 
-        return Ok(new { originalUrl = request.Url, shortenedUrl = encodedUrl });
+    [HttpGet("{shortenedUrl}")]
+    public async Task<IActionResult> DecodeUrl([FromRoute] string? shortenedUrl)
+    {
+        if (shortenedUrl == null) return Redirect("/");
+        var u = await _context.ShortenedUrls.Where(url => url.shortenedUrl == shortenedUrl).FirstOrDefaultAsync();
+        if (u == null) return NotFound("Could not find shortened url");
+        return Redirect(u.originalUrl);
+
     }
 }
