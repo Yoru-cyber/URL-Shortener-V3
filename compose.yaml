@@ -1,0 +1,8 @@
+﻿services:
+  url-shortener:
+    ports:
+      - "8080:8080"
+    image: url-shortener
+    build:
+      context: .
+      dockerfile: Dockerfile
