@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using URL_Shortener.Context;
-using Url_Shortener.DTOs;
+using Url_Shortener.Dtos;
 using URL_Shortener.Entities;
 using URL_Shortener.Utils;
 
@@ -19,15 +20,16 @@ public class ShortenerController : ControllerBase
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> index()
+    public async Task<IActionResult> Index()
     {
-        return Ok();
+        var shortenedUrls = await _context.ShortenedUrls.OrderBy(u => u.Id).Take(10).ToListAsync();
+        return Ok(shortenedUrls);
     }
 
 
     // POST api/url/encode
     [HttpPost("encode")]
-    public async Task<IActionResult> EncodeUrl([FromForm] UrlDTORequest request)
+    public async Task<IActionResult> EncodeUrl([FromForm] UrlDtoRequest request)
     {
         if (string.IsNullOrEmpty(request.Url)) return BadRequest("URL cannot be empty");
 
@@ -35,10 +37,23 @@ public class ShortenerController : ControllerBase
         var uniqueNumber = Base62Encoder.GenerateUniqueNumber(request.Url);
         var encodedUrl = Base62Encoder.Encode(uniqueNumber);
         var u = new ShortenedUrl { originalUrl = request.Url, shortenedUrl = encodedUrl };
-        var newShortenedUrl = await _context.AddAsync(u);
+        EntityEntry<ShortenedUrl> newShortenedUrl = await _context.AddAsync(u);
+        //Converting the new entry to DTO so it only has necessary info to consume
+        var urlDto = new UrlDtoResponse(newShortenedUrl.Entity.Id, newShortenedUrl.Entity.originalUrl,
+            newShortenedUrl.Entity.shortenedUrl);
+        //Returns the number of writes, in this case it should be one so if it is bigger than 0, return Ok
         var saveTask = await _context.SaveChangesAsync();
-        if (saveTask > 0) return Ok(newShortenedUrl.Entity);
+        if (saveTask > 0) return Created($"shortenedUrls/{urlDto.Id}", urlDto);
         return Conflict("Could not add URL");
+    }
+
+    [HttpGet("Url/{id:int}")]
+    public async Task<IActionResult> GetShortenedUrl(int id)
+    {
+        if (id < 0) return BadRequest("Invalid id");
+        var shortenedUrl = await _context.ShortenedUrls.FindAsync(id);
+        if (shortenedUrl is null) return NotFound();
+        return Ok(shortenedUrl);
     }
 
     [HttpGet("{shortenedUrl}")]
@@ -47,6 +62,7 @@ public class ShortenerController : ControllerBase
         if (shortenedUrl == null) return Redirect("/");
         var u = await _context.ShortenedUrls.Where(url => url.shortenedUrl == shortenedUrl).FirstOrDefaultAsync();
         if (u == null) return NotFound("Could not find shortened url");
-        return Redirect(u.originalUrl);
+        var urlDto = new UrlDtoResponse(u.Id, u.originalUrl, u.shortenedUrl);
+        return Redirect(urlDto.OriginalUrl);
     }
 }
