@@ -34,9 +34,10 @@ public class ShortenerController : ControllerBase
         // Generate a unique number based on the URL and encode it to Base62
         var uniqueNumber = Base62Encoder.GenerateUniqueNumber(request.Url);
         var encodedUrl = Base62Encoder.Encode(uniqueNumber);
-        var u = new ShortenedUrl {originalUrl = request.Url, shortenedUrl = encodedUrl};
-        var shortenedUrl = await _context.AddAsync(u);
-        if (shortenedUrl.State == EntityState.Added) return Ok(shortenedUrl.Entity);
+        var u = new ShortenedUrl { originalUrl = request.Url, shortenedUrl = encodedUrl };
+        var newShortenedUrl = await _context.AddAsync(u);
+        var saveTask = await _context.SaveChangesAsync();
+        if (saveTask > 0) return Ok(newShortenedUrl.Entity);
         return Conflict("Could not add URL");
     }
 
@@ -47,6 +48,5 @@ public class ShortenerController : ControllerBase
         var u = await _context.ShortenedUrls.Where(url => url.shortenedUrl == shortenedUrl).FirstOrDefaultAsync();
         if (u == null) return NotFound("Could not find shortened url");
         return Redirect(u.originalUrl);
-
     }
 }
