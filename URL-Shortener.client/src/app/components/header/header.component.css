@@ -1,0 +1,23 @@
+#header {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: baseline;
+}
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+a {
+  font-size: medium;
+  margin-left: 0.5rem;
+}
+h1 {
+  font-size: x-large;
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: -0.05em;
+}
