@@ -20,7 +20,7 @@
       - dev
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     depends_on:
       - database
 networks:
