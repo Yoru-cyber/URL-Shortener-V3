@@ -23,6 +23,16 @@
       dockerfile: dev.Dockerfile
     depends_on:
       - database
+  angular:
+    build:
+      context: URL-Shortener.client
+      dockerfile: dev.Dockerfile
+    networks:
+      - dev
+    ports:
+      - '4200:4200'
+    volumes:
+      - ./URL-Shortener.client/src:/app/src
 networks:
   dev:
     driver: bridge
