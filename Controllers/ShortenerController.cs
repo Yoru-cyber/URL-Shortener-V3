@@ -29,7 +29,7 @@ public class ShortenerController : ControllerBase
 
     // POST api/url/encode
     [HttpPost("encode")]
-    public async Task<IActionResult> EncodeUrl([FromForm] UrlDtoRequest request)
+    public async Task<IActionResult> EncodeUrl([FromBody] UrlDtoRequest request)
     {
         if (string.IsNullOrEmpty(request.Url)) return BadRequest("URL cannot be empty");
 
@@ -39,10 +39,10 @@ public class ShortenerController : ControllerBase
         var u = new ShortenedUrl { originalUrl = request.Url, shortenedUrl = encodedUrl };
         EntityEntry<ShortenedUrl> newShortenedUrl = await _context.AddAsync(u);
         //Converting the new entry to DTO so it only has necessary info to consume
+        var saveTask = await _context.SaveChangesAsync();
         var urlDto = new UrlDtoResponse(newShortenedUrl.Entity.Id, newShortenedUrl.Entity.originalUrl,
             newShortenedUrl.Entity.shortenedUrl);
         //Returns the number of writes, in this case it should be one so if it is bigger than 0, return Ok
-        var saveTask = await _context.SaveChangesAsync();
         if (saveTask > 0) return Created($"shortenedUrls/{urlDto.Id}", urlDto);
         return Conflict("Could not add URL");
     }
