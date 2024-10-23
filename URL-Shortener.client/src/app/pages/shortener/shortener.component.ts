@@ -1,19 +1,19 @@
 import { Component, inject } from '@angular/core';
 import { MainComponent } from '../../layouts/main/main.component';
 import {
-  FormBuilder,
   FormControl,
   FormGroup,
-  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import ShortenedUrlDto from '../../Dtos/ShortenedUrl';
 import { UrlShortenerService } from '../../services/url-shortener.service';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 @Component({
   selector: 'app-shortener',
   standalone: true,
-  imports: [MainComponent, ReactiveFormsModule],
+  imports: [MainComponent, ReactiveFormsModule, NzInputModule, NzButtonModule],
   templateUrl: './shortener.component.html',
   styleUrl: './shortener.component.css',
 })

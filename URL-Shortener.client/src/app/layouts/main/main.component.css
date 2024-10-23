@@ -1,7 +1,11 @@
 :host {
   text-align: center;
 }
-
+nz-header{
+  position: relative;
+  z-index: 10;
+box-shadow: 0 2px 8px #f0f1f2;
+}
 nz-header,
 nz-footer {
   background: #fff;

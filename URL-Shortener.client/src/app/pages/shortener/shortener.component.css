@@ -1,0 +1,17 @@
+#submit-btn{
+    margin-top: 10px;
+}
+label{
+    font-size: medium;
+    font-weight: 500;
+}
+input{
+    width: 400px;
+    border-radius: 5px;
+}
+@media (min-width: 1280px) { 
+    input{
+        width: 700px;
+    }
+ }
+ 

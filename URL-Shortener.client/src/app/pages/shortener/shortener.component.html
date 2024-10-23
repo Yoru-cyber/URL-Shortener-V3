@@ -1,24 +1,45 @@
 <app-main>
-  <div class="url-shortener">
-    <form [formGroup]="urlForm" (ngSubmit)="onSubmit()">
-      <label for="originalUrl">Enter URL to shorten:</label>
+  <div id="content" class="url-shortener">
+    <form
+      [formGroup]="urlForm"
+      (ngSubmit)="onSubmit()"
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      "
+    >
+      <label for="originalUrl">Enter the url to shorten:</label>
       <input
+        nz-input
         id="originalUrl"
         formControlName="originalUrl"
         placeholder="https://example.com"
+        nzSize="large"
       />
       @if ( urlForm.get('originalUrl')?.invalid &&
       urlForm.get('originalUrl')?.touched) {
       <div>
         @if (urlForm.get('originalUrl')?.hasError('required')) {
-        <small>URL is required.</small>
+        <p style="color: red">An url is required.</p>
         } @if (urlForm.get('originalUrl')?.hasError('pattern')) {
-        <small>Please enter a valid URL.</small>
+        <p style="color: red">Please enter a valid URL.</p>
         }
       </div>
       }
 
-      <button type="submit" [disabled]="urlForm.invalid">Shorten URL</button>
+      <button
+        id="submit-btn"
+        nz-button
+        nzType="primary"
+        [nzSize]="'large'"
+        nzShape="round"
+        type="submit"
+        [disabled]="urlForm.invalid"
+      >
+        Submit
+      </button>
     </form>
 
     @if (shortenedUrlDto) {
@@ -26,9 +47,13 @@
       <p>Original URL: {{ shortenedUrlDto.originalUrl }}</p>
       <p>
         Shortened URL:
-        <a [href]="'http://localhost:8080/api/v1/Shortener/'+shortenedUrlDto.shortenedUrl">{{
-          shortenedUrlDto.shortenedUrl
-        }}</a>
+        <a
+          [href]="
+            'http://localhost:8080/api/v1/Shortener/' +
+            shortenedUrlDto.shortenedUrl
+          "
+          >{{ shortenedUrlDto.shortenedUrl }}</a
+        >
       </p>
     </div>
     } @if (error) {
