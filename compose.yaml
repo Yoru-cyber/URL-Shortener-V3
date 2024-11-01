@@ -18,6 +18,13 @@
       - "80:80"
     networks:
       - dev
+    volumes:
+      - .:/app
+      - /app/obj/ # <- directory won't be mounted
+      - /app/bin/ # <- directory won't be mounted
+      - /app/HotReload.Sample.API/obj/ # <- directory won't be mounted
+      - /app/HotReload.Sample.API/bin/ # <- directory won't be mounted
+      - ~/.aspnet/https:/https:ro
     build:
       context: .
       dockerfile: dev.Dockerfile
